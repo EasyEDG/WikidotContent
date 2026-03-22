@@ -17,9 +17,9 @@ Using Creative Commons Public Licenses
 Creative Commons public licenses provide a standard set of terms and
 conditions that creators and other rights holders may use to share
 original works of authorship and other material subject to copyright
-and certain other rights specified in the public license below. The
+和 certain other rights specified in the public license below. The
 following considerations are for informational purposes only, are not
-exhaustive, and do not form part of our licenses.
+exhaustive, 和 do not form part of our licenses.
 
      Considerations for licensors: Our public licenses are
      intended for use by those authorized to give the public
