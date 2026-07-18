@@ -1,0 +1,333 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="cn" lang="cn">
+<head>
+    <title>便捷模块生成器 - SCP基金会</title>
+    <link rel="shortcut icon" href="/local--favicon/favicon.gif"/>
+    <link rel="icon" type="image/gif" href="/local--favicon/favicon.gif"/>
+    
+    <link rel="apple-touch-icon" href="/common--images/apple-touch-icon-57x57.png" />
+    <link rel="apple-touch-icon" sizes="72x72" href="/common--images/apple-touch-icon-72x72.png" />
+    <link rel="apple-touch-icon" sizes="114x114" href="/common--images/apple-touch-icon-114x114.png" />
+    <style type="text/css" id="bodyStyle">
+    @charset "utf-8";
+    @import url("https://d3g0gp89917ko0.cloudfront.net/v--7690939296dc/common--theme/base/css/style.css");
+    @import url("https://cdn.jsdelivr.net/gh/scp-cn-tech/sigma9@cn/cn/sigma9_ch.min.css");
+    @namespace url("http://www.w3.org/1999/xhtml");
+    
+    body {
+        background: transparent;
+        margin: 0;
+        padding: 0;
+        overflow-y: hidden;
+    }
+    
+    div#errorBlock {
+        display: none;
+    }
+    
+    div#errorBlock[data-user="undefined"] {
+        display: block;
+    }
+    
+    form#form *[disabled="disabled"], form *[disabled] {
+        -webkit-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+        cursor: not-allowed;
+    }
+    
+    p.not-select, p span.not-select {
+        -webkit-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+    }
+    
+    p#buttomArea input {
+        margin: 0px 2px;
+    }
+    
+    span:has(> input#translateCheckBox[disabled="disabled"]),
+    input#translateCheckBox[disabled="disabled"] + label {
+        -webkit-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+        cursor: not-allowed;
+    }
+    </style>
+    <link rel="stylesheet" type="text/css" href="textBoxes.css" />
+    <link rel="preload" href="createResizeIframe.js" as="script" />
+    <!-- clipboard.js -->
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.11/clipboard.min.js" defer></script>
+    <!-- C-take's resizing iframe method -->
+    <script type="text/javascript" src="createResizeIframe.js" defer></script>
+</head>
+<body>
+    <p>当然，你也可以使用这个便捷模块生成器。你只需要手动输入数据，或者将原文的版权模块代码复制至文本框中，生成器可以自动本地化组件：</p>
+    <div class="error-block" id="errorBlock">
+        <p style="text-align: center;"><em>注意到你尚未登入账号，<a href="https://www.wikidot.com/default--flow/login__LoginPopupScreen">建议你先登入你的 Wikidot 帐号。</a></em></p>
+    </div>
+    <form id="form" action="">
+        <p class="not-select">原文来源：<select id="inputLang" value="EN" onchange="changeLang()">
+                <option selected="selected" value="EN">英语（EN）</option>
+                <option value="INT">国际站（INT）</option>
+                <option value="RU">俄语（RU）</option>
+                <option value="CN">中文（CN）</option>
+                <option value="KO">韩语（KO）</option>
+                <option value="FR">法语（FR）</option>
+                <option value="PL">波兰语（PL）</option>
+                <option value="ES">西班牙语（ES）</option>
+                <option value="TH">泰语（TH）</option>
+                <option value="JP">日语（JP）</option>
+                <option value="DE">德语（DE）</option>
+                <option value="IT">意大利语（IT）</option>
+                <option value="UA">乌克兰语（UA）</option>
+                <option value="PTBR">葡萄牙语（PT）</option>
+                <option value="CS">捷克语（CZ）</option>
+                <option value="VN">越南语（VN）</option>
+            </select></p>
+        <p><span class="not-select">作者：</span><input type="text" id="inputAuthor" value="" style="width: 220px;" /></p>
+        <p><span class="not-select">译者：</span><input type="text" id="inputTranslator" value="" style="width: 220px;" /><span class="not-select"> </span><span style="display: inline-flex; align-items: center;"><input type="checkbox" id="translateCheckBox" name="translate" value="translate" onchange="updateButtonText()" /><label for="translateCheckBox"><span class="not-select">翻译版权模块</span></label></span></p>
+        <p><textarea id="inputLicenseInfo" rows="10" cols="80" style="resize: horizontal; overflow-x: hidden;"></textarea></p>
+        <p id="buttomArea"><input type="button" id="boxifyOrTranslateBtn" value="生成版权模块！" onclick="boxifyOrTranslateBox()"/>
+             <input type="button" class="btn" id="clipboardBtn" value="复制文本框中内容" data-clipboard-action="copy" data-clipboard-target="#inputLicenseInfo"/>
+            <input type="button" id="resetBtn" value="重置" onclick="resetBox()"/></p>
+    </form>
+    <p><em>注意：</em></p>
+    <ul>
+        <li>便捷模块生成器仅能自动翻译上文中已有的项目名称（如“文件名”、“图像作者”等），也不能自动翻译项目内容，请手动检查并翻译这些部分；</li>
+        <li>便捷模块生成器翻译的项目名称仅供参考，是否修改由译者自行衡量。</li>
+    </ul>
+    <script type="text/javascript">
+    new ClipboardJS('.btn');
+    
+    var getQueryString = (name) =>{
+        var r = document.location.search.substr(1).split("&");
+        var Reg = new RegExp("^" + name + "=([^&]*)$", "i");
+        for (var i = 0; i < r.length; i++) {
+            if (r[i].search(Reg) > -1) {
+                r[i] = unescape(r[i].match(Reg)[1]);
+            } else {
+                r.splice(i, 1);
+                i--;
+            }
+        }
+        if (r.length > 0) {
+            return r[0];
+        } else {
+            return "";
+        }
+    }
+    
+    var name = getQueryString("userName");
+    var userUndefined = document.getElementById("errorBlock");
+    if (name == "undefined") {
+        var userName = "Username";
+        userUndefined.setAttribute("data-user", "undefined");
+    } else {
+        var userName = getQueryString("userName");
+        userUndefined.removeAttribute("data-user");
+    }
+    
+    var inputLang = document.getElementById("inputLang");
+    var inputAuthor = document.getElementById("inputAuthor");
+    var inputTranslator = document.getElementById("inputTranslator");
+    var textareaInput = document.getElementById("inputLicenseInfo");
+
+    var checkbox = document.getElementById("translateCheckBox");
+    var btn = document.getElementById("boxifyOrTranslateBtn");
+    
+    inputTranslator.value = userName;
+    inputAuthor.value = "";
+    
+    function changeLang() {
+        if (inputLang.value == "CN") {
+            inputAuthor.value = inputTranslator.value;
+            inputTranslator.value = "";
+            inputTranslator.setAttribute("disabled", "disabled");
+            
+            checkbox.setAttribute("disabled", "disabled");
+            checkbox.checked = false;
+            updateButtonText();
+        } else {
+            if (inputAuthor.value !== "") {
+                inputTranslator.value = inputAuthor.value;
+                inputAuthor.value = "";
+            }
+            inputTranslator.removeAttribute("disabled");
+            checkbox.removeAttribute("disabled");
+        }
+    }
+    
+    function resetBox() {
+        var txtName = document.getElementById("inputLicenseInfo");
+        var name = txtName.value;
+        inputLicenseInfo.value = "> **文件名：**\n> **图像名：**（若与文件名不同）\n> **图像作者：**\n> **授权协议：**\n> **来源链接：**\n> **备注：**（可选）\n> **衍生自：**（若适用）";
+        checkLicenseBoxPresence();
+    } // end clear
+    
+    function boxify() {
+        var attribution = "";
+        var txtName = document.getElementById("inputLicenseInfo");
+        var name = txtName.value;
+        if (inputLang.value != "EN") attribution += "\n|lang=" + inputLang.value;
+        if (inputAuthor.getAttribute("disabled") == null) {
+            var author = "";
+            if (name.search(/\|author=[^|\]]+/) > -1) author = name.match(/\|author=([^|\]]+)/)[1].replace(/^\s+/, "").replace(/\s+$/, "");
+            if (author == "" && inputAuthor.value != userName) author = inputAuthor.value;
+            if (author != "") attribution += "\n|author=" + author;
+        }
+        if (inputTranslator.getAttribute("disabled") == null) {
+            var translator = "";
+            if (name.search(/\|translator=[^|\]]+/) > -1) translator = name.match(/\|translator=([^|\]]+)/)[1].replace(/^\s+/, "").replace(/\s+$/, "");
+            if (translator == "" && inputTranslator.value != userName) translator = inputTranslator.value;
+            if (translator != "") attribution += "\n|translator=" + translator;
+        }
+        if (attribution != "") attribution += "\n";
+        inputLicenseInfo.value = "[[include :scp-wiki-cn:component:license-box" + attribution + "]]\r\n" + name.replace(/\s*\[\[include .*?component:license-box[^\]]*?\]\]\s+={4,}\s+/gm, "").replace(/\s+={4,}\s+\[\[include .*?component:license-box-end\]\]\s*/gm, "").replace(/\*\*Filename[:：]\*\* */gm, "**文件名：**").replace(/\*\*Name[:：]\*\* */gm, "**图像名：**").replace(/\*\*Author[:：]\*\* */gm, "**图像作者：**").replace(/\*\*License[:：]\*\* */gm, "**授权协议：**").replace(/\*\*Source Link[:：]\*\* */gm, "**来源链接：**").replace(/\*\*Additional Notes[:：]\*\* */gm, "**备注：**").replace(/\*\*Derivative of[:：]\*\* */gm, "**衍生自：**").replace(/:\*\* */gm, "：**").replace(/(\*\*[^*]*\*\*)(https?:\/\/)/gm, "$1*$2") + "\r\n[[include :scp-wiki-cn:component:license-box-end]]";
+        checkLicenseBoxPresence();
+    } // end boxify
+    
+    function checkLicenseBoxPresence() {
+        if (!textareaInput || !btn) return;
+        var content = textareaInput.value;
+        var hasStart = content.indexOf("[[include :scp-wiki-cn:component:license-box") !== -1;
+        var hasEnd = content.indexOf("[[include :scp-wiki-cn:component:license-box-end]]") !== -1;
+        
+        btn.disabled= (hasStart || hasEnd);
+    }
+    
+    resetBox();
+    
+    const translateConfig = {
+        // EN
+        "[[include :scp-wiki:component:license-box": "[[include :scp-wiki-cn:component:license-box",
+        "[[include :scp-wiki:component:license-box-theme": "[[include :scp-wiki-cn:component:license-box-theme",
+        "[[include :scp-wiki:component:license-box-end]]": "[[include :scp-wiki-cn:component:license-box-end]]",
+        "**Filename:**": "**文件名：**",
+        "**Name:**": "**图像名：**",
+        "**Author:**": "**图像作者：**",
+        "**License:**": "**授权协议：**",
+        "**Source Link:**": "**来源链接：**",
+        "**Additional Notes:**": "**备注：**",
+        "**Derivative Of:**": "**衍生自：**",
+        // INT / TH
+        "[[include component:license-box": "[[include :scp-wiki-cn:component:license-box",
+        "[[include component:license-box-end]]": "[[include :scp-wiki-cn:component:license-box-end]]",
+        "|contributers=": "|author=",
+        "**Derivative of:**": "**衍生自：**",
+        "**Source:**": "**来源：**",
+        "**Notes:**": "**备注：**",
+        // IT
+        "[[include :fondazionescp:component:license-box": "[[include :scp-wiki-cn:component:license-box",
+        "[[include :fondazionescp:component:license-box-end]]": "[[include :scp-wiki-cn:component:license-box-end]]",
+        "**Nome del file:**": "**文件名：**",
+        "**Titolo:**": "**图像名：**",
+        "**Autore:**": "**图像作者：**",
+        "**Licenza:**": "**授权协议：**",
+        "**Sorgente link:**": "**来源链接：**",
+        "**Note:**": "**备注：**",
+        "**Derivato da:**": "**衍生自：**",
+        // JP
+        "[[include :scp-jp:component:license-box": "[[include :scp-wiki-cn:component:license-box",
+        "[[include :scp-jp:component:license-box-end]]": "[[include :scp-wiki-cn:component:license-box-end]]",
+        "**ファイル名:**": "**文件名：**",
+        "**タイトル:**": "**图像名：**",
+        "**著作権者:**": "**图像作者：**",
+        "**公開年:**": "**发布年份：**",
+        "**ライセンス:**": "**授权协议：**",
+        "**ソースリンク:**": "**来源链接：**",
+        "**追記事項:**": "**备注：**",
+        "**派生元:**": "**衍生自：**",
+        // KO
+        "[[include :scpko:component:license-box": "[[include :scp-wiki-cn:component:license-box",
+        "[[include :scpko:component:license-box-end]]": "[[include :scp-wiki-cn:component:license-box-end]]",
+        "**파일명:**": "**文件名：**",
+        "**명칭:**": "**图像名：**",
+        "**저자:**": "**图像作者：**",
+        "**라이선스:**": "**授权协议：**",
+        "**출처:**": "**来源链接：**",
+        "**비고:**": "**备注：**",
+        "**원저작물:**": "**衍生自：**",
+        // PL
+        "[[include :scp-pl:component:license-box": "[[include :scp-wiki-cn:component:license-box",
+        "[[include :scp-pl:component:license-box-end]]": "[[include :scp-wiki-cn:component:license-box-end]]",
+        "**Źródło dzieła:**": "**图像名：**",
+        "**Twórca dzieła:**": "**图像作者：**",
+        "**Licencja:**": "**授权协议：**",
+        "**Źródło dzieła:**": "**来源链接：**",
+        // UA
+        "[[include component:license-box-theme": "[[include :scp-wiki-cn:component:license-box-theme",
+        "**Ім'я файлу:**": "**文件名：**",
+        "**Особиста назва:**": "**图像名：**",
+        "**Автор:**": "**图像作者：**",
+        "**Ліцензія:**": "**授权协议：**",
+        "**Посилання:**": "**来源链接：**",
+        "**Додаткові примітки:**": "**备注：**",
+        "**Засновано на:**": "**衍生自：**",
+        "|authors=": "|author=",
+        "|translators=": "|translator=",
+        // VN
+        "[[include :scp-vn:component:license-box": "[[include :scp-wiki-cn:component:license-box",
+        "[[include :scp-vn:component:license-box-theme": "[[include :scp-wiki-cn:component:license-box-theme",
+        "[[include :scp-vn:component:license-box-end]]": "[[include :scp-wiki-cn:component:license-box-end]]",
+        "**Tệp:**": "**文件名：**",
+        "**Tên:**": "**图像名：**",
+        "**Tác giả:**": "**图像作者：**",
+        "**Giấy phép:**": "**授权协议：**",
+        "**Nguồn:**": "**来源链接：**",
+        "**Ghi chú thêm:**": "**备注：**",
+        "**Chỉnh sửa từ:**": "**衍生自：**"
+    };
+    
+    function translateBox() {
+        const textarea = document.getElementById("inputLicenseInfo");
+        if (!textarea) return;
+        
+        let content = textarea.value;
+        if (!content.trim()) return;
+        
+        const keys = Object.keys(translateConfig);
+        if (keys.length === 0) return;
+        const sortedKeys = [...keys].sort((a, b) => b.length - a.length);
+        
+        const escapeRegex = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const pattern = sortedKeys.map(escapeRegex).join('|');
+        const regex = new RegExp(pattern, 'g');
+        
+        const replacedContent = content.replace(regex, (matched) => {
+            return translateConfig[matched] || matched;
+        });
+        
+        textarea.value = replacedContent;
+        checkLicenseBoxPresence();
+    }
+    
+    function updateButtonText() {
+        if (checkbox && btn) {
+            btn.value = checkbox.checked ? "翻译版权模块！" : "生成版权模块！";
+        }
+    }
+    
+    function boxifyOrTranslateBox() {
+        if (checkbox && checkbox.checked) {
+            translateBox();
+        } else {
+            boxify();
+        }
+    }
+    
+    window.addEventListener('load', function() {
+        changeLang();
+        checkLicenseBoxPresence();
+        
+        var textarea = document.getElementById("inputLicenseInfo");
+        if (textarea) {
+            textarea.addEventListener('input', checkLicenseBoxPresence);
+        }
+        
+        updateButtonText();
+    });
+    </script>
+    <div id="iframeset"></div>
+</body>
+</html>
