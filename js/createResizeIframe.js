@@ -1,6 +1,5 @@
 // C-take's resizing iframe method //
 document.addEventListener("DOMContentLoaded",function(){
-    const main = document.querySelector("main.container");
     let oldHeight = 0;
 
     createResizeIframe();
